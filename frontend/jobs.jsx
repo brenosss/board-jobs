@@ -1,5 +1,5 @@
 import React from 'react';
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -12,11 +12,16 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Grid from '@material-ui/core/Grid';
 
 const styles = theme => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120,
+    textTransform: 'capitalize'
+  },
+  menuItem:{
+    textTransform: 'capitalize'
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
@@ -28,8 +33,72 @@ const styles = theme => ({
     'text-align': 'center',
     'padding-top': '20px',
   }
-});
+})
 
+const useStyle = makeStyles(styles)
+
+function FormSelect({name, choices, value, handleChange}) {
+  const classes = useStyle()
+  return(
+    <FormControl className={classes.formControl}>
+      <InputLabel id={`${name}-select-label`}>{name}</InputLabel>
+      <Select
+        labelId={`${name}-select-label`}
+        id={`${name}-select`}
+        onChange={handleChange}
+        name={name}
+        value={value}
+      >
+      {choices.map((choice) => (
+        <MenuItem className={classes.menuItem} key={choice} value={choice}>{choice}</MenuItem>
+      ))}
+      </Select>
+    </FormControl>
+  )
+}
+function Loader({isLoaded}) {
+  const classes = useStyle()
+  if (isLoaded == false){
+    return(
+      <div className={classes.progress}>
+        <CircularProgress />
+      </div>
+    )
+  }
+  return null
+}
+function TableContent({rows, search}){
+  return (
+    rows.map((row) => (
+      <TableRow key={row.id}>
+        <TableCell component="th" scope="row"> {row.title}</TableCell>
+        <TableCell>{row.company}</TableCell>
+        <TableCell>{row.type}</TableCell>
+        <TableCell>{row.location}</TableCell>
+      </TableRow>
+    ))
+  )
+}
+function TableJobs({rows}){
+  const headerCells = ['Title', 'Company', 'Type', 'Location']
+  const classes = useStyle()
+  return (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            {headerCells.map(headerCell => (
+              <TableCell key={headerCell}>{headerCell}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableContent rows={rows}/>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  )
+}
 class JobsTable extends React.Component {
   constructor(props) {
     super(props);
@@ -37,18 +106,29 @@ class JobsTable extends React.Component {
       error: null,
       isLoaded: false,
       items: [],
-      city: {}
+      city: 'all',
+      technology: 'all',
 
     };
     this.classes = props.classes
     this.handleChange = this.handleChange.bind(this);
+
+    this.cityOptionsSelect = {
+      name: 'city',
+      choices: ['all', 'chicago', 'san francisco', 'phoenix', 'london', 'beijing', 'paris'],
+      handleChange: this.handleChange
+    }
+    this.technologyOptionsSelect = {
+      name: 'technology',
+      choices: ['all', 'javascript', 'java', 'python', 'react', 'ruby', 'go'],
+      handleChange: this.handleChange
+    }
   }
 
   componentDidMount() {
-    this.fetch_jobs()
+    this.fetchComponent()
   }
-
-  fetch_jobs(){
+  fetchComponent(){
     fetch("http://127.0.0.1:8000/jobs")
       .then(res => res.json())
       .then(
@@ -66,70 +146,26 @@ class JobsTable extends React.Component {
         }
       )
   }
-
   handleChange(event){
-    this.setState({city: event.target.value, isLoaded: false});
-    this.fetch_jobs()
+    const name = event.target.name
+    this.setState(
+      {[name]: event.target.value, isLoaded: false },
+      () => {this.fetchComponent()}
+    )
   };
-
-
-  render_forms(){
-    return(
-      <FormControl className={this.classes.formControl}>
-        <InputLabel id="city-select-label">City</InputLabel>
-        <Select
-          labelId="city-select-label"
-          id="city-select"
-          onChange={this.handleChange}
-        >
-          <MenuItem value={'chicago'}>Chicago</MenuItem>
-          <MenuItem value={'san francisco'}>San Francisco</MenuItem>
-          <MenuItem value={'phoenix'}>Phoenix</MenuItem>
-        </Select>
-      </FormControl>
-    )
-  }
-  render_table_body(){
-    return (
-      this.state.items.map((row) => (
-        <TableRow key={row.id}>
-          <TableCell component="th" scope="row"> {row.title}</TableCell>
-          <TableCell>{row.company}</TableCell>
-          <TableCell>{row.type}</TableCell>
-          <TableCell>{row.location}</TableCell>
-        </TableRow>
-      ))
-    )
-  }
-  render_progress(){
-    if (this.state.isLoaded == false){
-      return(
-        <div className={this.classes.progress}>
-          <CircularProgress />
-        </div>
-      )
-    }
-  }
   render(){
     return (
       <div>
-        {this.render_forms()}
-        <TableContainer component={Paper}>
-          <Table className={this.classes.table} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Company</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Location</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.render_table_body()}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {this.render_progress()}
+        <FormSelect
+          value={this.state.city}
+          {...this.cityOptionsSelect}
+        />
+        <FormSelect
+          value={this.state.technology}
+          {...this.technologyOptionsSelect}
+        />
+        <TableJobs rows={this.state.items}/>
+        <Loader isLoaded={this.state.isLoaded}/>
       </div>
     );
   }
