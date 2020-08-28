@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "parcel frontend/index.html -d frontend/dev"
+    "dev": "parcel index.html -d dev"
   },
   "author": "",
   "license": "ISC",
