@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Container from '@material-ui/core/Container';
-import JobsTable from './jobs.jsx';
+import Main from './main.jsx';
 
 ReactDOM.render(
   <Container >
-      <JobsTable/>
+      <Main/>
   </Container >,
   document.getElementById('root')
 )
