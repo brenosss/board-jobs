@@ -35,7 +35,8 @@ class Main extends React.Component {
     this.fetchComponent()
   }
   fetchComponent(){
-    fetch("http://127.0.0.1:8000/jobs")
+    const { technology, city } = this.state
+    fetch(`http://127.0.0.1:8000/jobs?technology=${technology}&city=${city}`)
       .then(res => res.json())
       .then(
         (result) => {
@@ -70,7 +71,7 @@ class Main extends React.Component {
           value={this.state.technology}
           {...this.technologyOptionsSelect}
         />
-        <TableJobs rows={this.state.items}/>
+        <TableJobs rows={this.state.items} isLoaded={this.state.isLoaded}/>
         <Loader isLoaded={this.state.isLoaded}/>
       </div>
     );

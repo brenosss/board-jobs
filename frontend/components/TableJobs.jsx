@@ -11,7 +11,7 @@ import { styles } from './Style'
 
 const useStyle = makeStyles(styles)
 
-function TableContent({rows, search}){
+function TableContent({rows}){
   return (
     rows.map((row) => (
       <TableRow key={row.id}>
@@ -23,9 +23,15 @@ function TableContent({rows, search}){
     ))
   )
 }
-export function TableJobs({rows}){
-  const headerCells = ['Title', 'Company', 'Type', 'Location']
+export function TableJobs({rows, isLoaded}){
   const classes = useStyle()
+  if (!isLoaded){
+    return null
+  }
+  if (rows.length == 0){
+    return <h2>Nothing found</h2>
+  }
+  const headerCells = ['Title', 'Company', 'Type', 'Location']
   return (
     <TableContainer component={Paper}>
       <Table className={classes.table} aria-label="simple table">
