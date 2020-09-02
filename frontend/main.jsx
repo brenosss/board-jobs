@@ -36,7 +36,7 @@ class Main extends React.Component {
   }
   fetchComponent(){
     const { technology, city } = this.state
-    fetch(`http://127.0.0.1:8000/jobs?technology=${technology}&city=${city}`)
+    fetch(`http://127.0.0.1:8000/jobs?description=${technology}&location=${city}`)
       .then(res => res.json())
       .then(
         (result) => {
