@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+  frontend:
+    build:
+        context: ./frontend
+        dockerfile: Dockerfile-frontend
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+    ports:
+        - 1234:1234
+    restart: "no"
+    depends_on:
+        - backend
+  backend:
+    build:
+        context: ./backend
+        dockerfile: Dockerfile-backend
+    command: gunicorn -b 0.0.0.0:8000 jobs.app
+    volumes:
+      - ./backend:/app
+    ports:
+        - 8000:8000
+    restart: "no"
+

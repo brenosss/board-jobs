@@ -1,0 +1,13 @@
+FROM python:alpine
+
+# set working directory
+RUN mkdir /app
+WORKDIR /app
+ADD requirements.txt /app/
+
+# Install gunicorn & falcon
+RUN pip install -r requirements.txt
+
+# Copy all frontend stuff to new "app" folder
+COPY . /app/
+EXPOSE 8000
